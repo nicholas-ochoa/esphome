@@ -1,15 +1,17 @@
 substitutions:
   name: "sonoff-s31"
   friendly_name: "Sonoff S31"
+  version:  "1.0.0"
+  device_description: ${name} - version ${version}.
 
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  comment: Sonoff S31 Wifi Switch
+  comment: Sonoff S31 Wifi Power Switch
 
   project:
-    name: "Industrial.Sonoff.S31"
-    version: "1.0.0"
+    name: "Industrial.Sonoff-S31"
+    version: "${version}"
 
 esp8266:
   board: esp01_1m
