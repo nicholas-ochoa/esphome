@@ -1,9 +1,10 @@
 substitutions:
-  name: sonoff-s31
+  name: "sonoff-s31"
+  friendly_name: "Sonoff S31"
 
 esphome:
-  name: sonoff-s31
-  friendly_name: Sonoff S31
+  name: ${name}
+  friendly_name: ${friendly_name}
   comment: Sonoff S31 Wifi Switch
 
   project:
@@ -30,7 +31,7 @@ wifi:
 captive_portal:
 
 dashboard_import:
-  package_import_url: github://nicholas-ochoa/esphome/sonoff-s31-base.yaml@main
+  package_import_url: github://nicholas-ochoa/esphome/sonoff-s31-base.yaml
   import_full_config: false
 
 # Device Specific Config
