@@ -1,0 +1,143 @@
+substitutions:
+  name: "sonoff-dual-r3-v1.6"
+  friendly_name: "Sonoff Dual R3 v1.6"
+  version:  "1.0.0"
+  device_description: ${name} - version ${version}.
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: Sonoff Dual R3 Wifi Relay with Power Monitoring
+  name_add_mac_suffix: true
+
+  project:
+    name: "Industrial.Sonoff-Dual-R3"
+    version: "${version}"
+
+esp32:
+  board: esp32dev
+
+logger:
+  baud_rate: 0
+
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+wifi:
+
+dashboard_import:
+  package_import_url: github://nicholas-ochoa/esphome/sonoff-dual-r3-1.6-base.yaml
+  import_full_config: false
+
+# device specific config
+
+sensor:
+  - platform: wifi_signal
+    name: "RSSI"
+    id: sensor_rssi
+    update_interval: 90s
+    entity_category: "diagnostic"
+
+  - platform: uptime
+    name: "Uptime"
+    id: sensor_uptime
+    update_interval: 300s
+    entity_category: "diagnostic"
+
+  - platform: cse7761
+    update_interval: 21
+    voltage:
+      name: 'Voltage'
+    current_1:
+      name: 'Current 1'
+      disabled_by_default: True
+    current_2:
+      name: 'Current 2'
+      disabled_by_default: True
+    active_power_1:
+      name: 'Power 1'
+    active_power_2:
+      name: 'Power 2'
+
+uart:
+  tx_pin: GPIO25
+  rx_pin: GPIO26
+  baud_rate: 38400
+  parity: EVEN
+  stop_bits: 1
+
+button:
+  - platform: restart
+    name: "Restart"
+    id: button_restart
+
+light:
+  - platform: status_led
+    name: "LED"
+    id: led_status
+    pin:
+      number: GPIO13
+      inverted: True
+    internal: True
+
+switch:
+  - platform: gpio
+    name: "1"
+    pin: GPIO27
+    id: relay_1
+
+  - platform: gpio
+    name: "2"
+    pin: GPIO14
+    id: relay_2
+
+binary_sensor:
+  - platform: gpio
+    name: "Button"
+    id: sensor_button
+    pin:
+      number: GPIO00
+      mode:
+        input: True
+        pullup: True
+      inverted: True
+    disabled_by_default: True
+    icon: 'mdi:radiobox-blank'
+    filters:
+      - delayed_on: 50ms
+    on_press:
+      - switch.toggle: relay_1
+
+  - platform: gpio
+    name: "1"
+    pin:
+      number: GPIO32
+      mode:
+        input: True
+        pullup: True
+      inverted: True
+    filters:
+      - delayed_on_off: 50ms
+    on_press:
+      - switch.turn_on: relay_1
+    on_release:
+      - switch.turn_off: relay_1
+
+  - platform: gpio
+    name: "2"
+    pin:
+      number: GPIO33
+      mode:
+        input: True
+        pullup: True
+      inverted: True
+    filters:
+      - delayed_on_off: 50ms
+    on_press:
+      - switch.turn_on: relay_2
+    on_release:
+      - switch.turn_off: relay_2
