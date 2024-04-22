@@ -1,6 +1,6 @@
 substitutions:
-  name: "emporiavue2"
-  friendly_name: "Emporia Vue 2"
+  name: emporiavue2
+  friendly_name: vue2
   version:  "1.0.0"
   device_description: ${name} - version ${version}.
 
