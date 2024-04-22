@@ -10,6 +10,10 @@ esphome:
   comment: Emporia Vue 2 Power Monitoring
   name_add_mac_suffix: false
 
+  project:
+    name: "Industrial.Emporia-Vue2"
+    version: "${version}"
+
 external_components:
   - source: github://emporia-vue-local/esphome@dev
     components:
