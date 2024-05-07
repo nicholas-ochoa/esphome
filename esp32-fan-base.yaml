@@ -1,0 +1,43 @@
+# https://esphome.io/components/fan/
+
+substitutions:
+  name: "esp32-fan"
+  friendly_name: "ESP32 Pedestal Fan"
+  version:  "1.0.0"
+  device_description: ${name} - version ${version}.
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  comment: ESP32 Pedestal Fan
+  name_add_mac_suffix: true
+
+  project:
+    name: "Industrial.ESP32-Fan"
+    version: "${version}"
+
+esp8266:
+  board: nodemcuv2
+
+logger:
+  baud_rate: 0
+
+api:
+
+ota:
+
+web_server:
+  port: 80
+
+wifi:
+
+dashboard_import:
+  package_import_url: github://nicholas-ochoa/esphome/esp32-fan-base.yaml
+  import_full_config: false
+
+uart:
+  rx_pin: RX
+  baud_rate: 4800
+
+fan:
+  - platform: speed

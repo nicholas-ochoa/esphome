@@ -16,6 +16,7 @@ esphome:
 
 external_components:
   - source: github://emporia-vue-local/esphome@dev
+    refresh: 0s
     components:
       - emporia_vue
 
