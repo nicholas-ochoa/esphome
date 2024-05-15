@@ -28,15 +28,10 @@ logger:
 
 api:
   encryption:
-    key: !secret api_encryption_key
 
 ota:
-  password: !secret wifi_password
 
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  use_address: 10.0.0.34
 
 time:
   - platform: homeassistant
