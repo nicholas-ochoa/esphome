@@ -1,0 +1,342 @@
+substitutions:
+  name: "levoit-core200s"
+  upper_name: Levoit Core 200s
+  init: 'component_core200sUART::instance(id(uart_mcu2esp));'
+
+esphome:
+  name: ${name}
+  includes:
+    - levoit-core-200s.h
+  project:
+    name: "Levoit.Core200s"
+    version: "0.7.0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_FREERTOS_UNICORE: y
+
+dashboard_import:
+  package_import_url: github://nicholas-ochoa/esphome/levoit-core-200s-base.yaml
+  import_full_config: false
+
+logger:
+  # baud_rate: 115200
+  # level: VERBOSE
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  password: !secret wifi_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  use_address: 10.0.0.34
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+uart:
+  - id: uart_mcu2esp
+    tx_pin:
+      number: GPIO17
+      inverted: false
+    rx_pin:
+      number: GPIO16
+      inverted: false
+    baud_rate: 115200
+    #debug:
+    #  direction: BOTH
+    #  after:
+    #      timeout: 50ms
+    #  sequence:
+    #    - lambda:  UARTDebug::log_hex(direction, bytes, ':');
+
+custom_component:
+  - lambda: |-
+      auto c_component_instance = ${init}
+      return {c_component_instance};
+
+sensor:
+  - platform: uptime
+    name: ${upper_name} Uptime
+
+  - platform: wifi_signal
+    name: ${upper_name} WiFi Signal
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${upper_name} IP Address
+
+  - platform: custom
+    lambda: |-
+        auto c_component_instance = ${init}
+        App.register_component(c_component_instance);
+        return {
+          c_component_instance->textsensor_fanSpeed,
+          c_component_instance->textsensor_Power,
+          c_component_instance->textsensor_SleepMode,
+          c_component_instance->textsensor_DisplayLit,
+          c_component_instance->textsensor_DisplayLocked,
+          c_component_instance->textsensor_mcuFW,
+          c_component_instance->textsensor_DisplayState,
+          c_component_instance->textsensor_NightLight,
+          c_component_instance->textsensor_FilterState
+        };
+
+    text_sensors:
+      - name: ${upper_name} Fan Speed
+        icon: mdi:fan
+        id: fan_speed
+
+      - name: ${upper_name} Power
+        icon: mdi:power
+        id: power_state
+
+      - name: ${upper_name} Sleep Mode
+        icon: mdi:sleep
+        id: sleep_mode
+
+      - name: ${upper_name} Display Light
+        icon: mdi:lightbulb-on-50
+        id: display_light
+
+      - name: ${upper_name} Display Locked
+        icon: mdi:lock
+        id: display_locked
+
+      - name: ${upper_name} MCU Firmware Version
+        icon: mdi:select-inverse
+        entity_category:  diagnostic
+
+      - name: ${upper_name} Display State
+        icon: mdi:monitor-small
+        id: display_state
+
+      - name: ${upper_name} Night Light
+        icon: mdi:lightbulb-on-50
+        id: night_light
+
+      - name: ${upper_name} Filter LED
+        icon: mdi:air-filter
+        id: filter_led
+
+switch:
+  - platform: template
+    name: "Power Switch"
+    lambda: |-
+      if (id(power_state).state == "On") {
+        return true;
+      } else {
+        return false;
+      }
+
+    turn_on_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->power_on();
+
+    turn_off_action:
+      then:
+        - lambda: |-
+            id(current_fan_speed).set_level(0.0);
+
+        - if:
+            condition:
+              lambda: |-
+                return id(power_state).state == "On";
+            then:
+              - delay: 250ms
+
+              - lambda: |-
+                  auto c_component_instance = ${init}
+                  c_component_instance->power_off();
+
+
+  - platform: template
+    name: "Sleep Mode"
+    lambda: |-
+      if (id(power_state).state == "On" && id(sleep_mode).state == "On") {
+        return true;
+      } else {
+        return false;
+      }
+
+    turn_on_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->sleep_mode_on();
+
+    turn_off_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->sleep_mode_off();
+
+
+  - platform: template
+    name: "Display"
+    lambda: |-
+      if (id(power_state).state == "On" && id(display_state).state == "On") {
+        return true;
+      } else {
+        return false;
+      }
+
+    turn_on_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->display_on();
+
+    turn_off_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->display_off();
+
+
+  - platform: template
+    name: "Display Lock"
+    lambda: |-
+      if (id(power_state).state == "On" && id(display_locked).state == "On") {
+        return true;
+      } else {
+        return false;
+      }
+
+    turn_on_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->lock_display();
+
+    turn_off_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->unlock_display();
+
+
+  - platform: template
+    name: "Replace Filter LED"
+    lambda: |-
+      if (id(power_state).state == "On" && id(filter_led).state == "On") {
+        return true;
+      } else {
+        return false;
+      }
+
+    turn_on_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->filter_led_on();
+
+    turn_off_action:
+      then:
+        - lambda: |-
+            auto c_component_instance = ${init}
+            c_component_instance->filter_led_off();
+
+
+select:
+  - platform: template
+    name: "Night Light"
+    options:
+      - "High"
+      - "Low"
+      - "Off"
+    lambda: |-
+      return id(night_light).state;
+    set_action:
+      then:
+        - logger.log:
+            format: "Night Light set to: %s"
+            args: [ x.c_str() ]
+
+        - lambda: |-
+            auto c_component_instance = ${init}
+
+            if (x == "High") {
+              c_component_instance->nightlight_high();
+            } else if (x == "Low") {
+              c_component_instance->nightlight_low();
+            } else {
+              c_component_instance->nightlight_off();
+            }
+
+
+output:
+  - platform: template
+    id: current_fan_speed
+    type: float
+    write_action:
+      then:
+        - logger.log:
+            format: "Fan Speed was changed to %2.4f!"
+            args: [ state ]
+
+        - if:
+            condition:
+              lambda: |-
+                return id(power_state).state == "Off";
+            then:
+              - lambda: |-
+                  auto c_component_instance = ${init}
+                  c_component_instance->power_on();
+
+              - delay: 250ms
+
+        - lambda: |-
+            auto c_component_instance = ${init}
+
+            if (state < 0.33f) {
+              c_component_instance->power_off();
+            } else {
+              if (state >= 0.33 && state < 0.65) {
+                c_component_instance->set_fan_manual_low();
+              } else if (state >= 0.66 && state < 0.99) {
+                c_component_instance->set_fan_manual_medium();
+              } else {
+                c_component_instance->set_fan_manual_high();
+              }
+            }
+
+
+fan:
+  - platform: speed
+    name: Fan Speed
+    speed_count: 3
+    output: current_fan_speed
+
+
+button:
+  - platform: restart
+    name: ${upper_name} Restart
+
+
+interval:
+  - interval: 1s
+    then:
+      if:
+        condition:
+          wifi.connected:
+        then:
+          - lambda: |-
+              auto c_component_instance = ${init}
+              c_component_instance->wifi_led_on();
+        else:
+          - lambda: |-
+              auto c_component_instance = ${init}
+              c_component_instance->wifi_led_off();
