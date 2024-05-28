@@ -1,13 +1,13 @@
 substitutions:
   name: "sonoff-s31"
   friendly_name: "Sonoff S31"
-  version:  "1.0.0"
+  version:  "1.1.0"
   device_description: ${name} - version ${version}.
 
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  comment: Sonoff S31 Wifi Power Switch
+  comment: ${friendly_name} S31 Wifi Power Switch
   name_add_mac_suffix: true
 
   project:
@@ -45,45 +45,72 @@ binary_sensor:
       number: GPIO0
       mode: INPUT_PULLUP
       inverted: True
-    name: "button"
+    name: "${friendly_name} Button"
     on_press:
       - switch.toggle: relay
+
   - platform: status
-    name: "status"
+    name: "${friendly_name} Status"
 
 sensor:
   - platform: wifi_signal
-    name: "wifi_signal"
-    update_interval: 60s
+    name: "${friendly_name} WiFi Signal"
+    update_interval: 15s
+
   - platform: cse7766
     current:
-      name: "current"
-      accuracy_decimals: 1
-    voltage:
-      name: "voltage"
-      accuracy_decimals: 1
-    power:
-      name: "power"
-      accuracy_decimals: 1
-      id: power
-  - platform: integration
-    name: "energy"
-    sensor: power
-    time_unit: h
-    unit_of_measurement: kWh
-    filters:
-      - multiply: 0.001
+      name: "${friendly_name} Current"
+      accuracy_decimals: 2
+      filters:
+        - throttle_average: 5s
 
-time:
-  - platform: sntp
-    id: the_time
+    voltage:
+      name: "${friendly_name} Voltage"
+      accuracy_decimals: 2
+      filters:
+        - throttle_average: 5s
+
+    power:
+      name: "${friendly_name} Power"
+      accuracy_decimals: 2
+      id: my_power
+      filters:
+        - throttle_average: 5s
+
+    energy:
+      name: "${friendly_name} Energy"
+      accuracy_decimals: 2
+      filters:
+        - throttle_average: 5s
+
+    apparent_power:
+      name: "${friendly_name} Apparent Power"
+      filters:
+        - throttle_average: 5s
+
+    power_factor:
+      name: "${friendly_name} Power Factor"
+      accuracy_decimals: 2
+      filters:
+        - throttle_average: 5s
+
+  - platform: total_daily_energy
+    name: "${friendly_name} Daily Energy"
+    power_id: my_power
+    accuracy_decimals: 2
 
 switch:
   - platform: gpio
-    name: "relay"
+    name: "${friendly_name} Relay"
     pin: GPIO12
     id: relay
     restore_mode: ALWAYS_ON
 
-status_led:
-  pin: GPIO13
+time:
+  - platform: sntp
+    id: my_time
+
+# status_led:
+#   pin:
+#     number: GPIO13
+#     inverted: True
