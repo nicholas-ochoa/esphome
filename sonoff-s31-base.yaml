@@ -117,3 +117,12 @@ switch:
 time:
   - platform: sntp
     id: my_time
+
+button:
+  - platform: restart
+    name: ${friendly_name} Restart
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${friendly_name} IP Address
