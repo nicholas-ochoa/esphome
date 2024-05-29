@@ -109,6 +109,7 @@ switch:
     pin: GPIO13
     id: status_led
     name: "${friendly_name} Status LED"
+    inverted: true
 
 time:
   - platform: sntp
