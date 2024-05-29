@@ -28,13 +28,14 @@ api:
 
 ota:
 
-web_server:
-  port: 80
-
 wifi:
 
 dashboard_import:
-  package_import_url: github://nicholas-ochoa/esphome/sonoff-s31-base.yaml
+  package_import_url:
+    url: https://github.com/nicholas-ochoa/esphome
+    file: sonoff-s31-base.yaml
+    ref: main
+    refresh: 0s
   import_full_config: false
 
 uart:
