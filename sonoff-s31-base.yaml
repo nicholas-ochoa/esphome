@@ -9,6 +9,10 @@ esphome:
   friendly_name: ${friendly_name}
   comment: ${friendly_name} S31 Wifi Power Switch
   name_add_mac_suffix: true
+  on_boot:
+    then:
+      - delay: 10s
+      - switch.turn_on: status_led
 
   project:
     name: "Industrial.Sonoff-S31"
@@ -32,8 +36,6 @@ wifi:
 dashboard_import:
   package_import_url: github://nicholas-ochoa/esphome/sonoff-s31-base.yaml
   import_full_config: false
-
-# Device Specific Config
 
 uart:
   rx_pin: RX
@@ -106,11 +108,11 @@ switch:
     id: relay
     restore_mode: ALWAYS_ON
 
+  - platform: gpio
+    pin: GPIO13
+    id: status_led
+    name: "${friendly_name} Status LED"
+
 time:
   - platform: sntp
     id: my_time
-
-# status_led:
-#   pin:
-#     number: GPIO13
-#     inverted: True
